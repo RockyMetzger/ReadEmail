@@ -23,7 +23,38 @@ namespace ReadEmail
         {
             InitializeComponent();
         }
+        private void ReadAccounts()
+        {
+            Microsoft.Office.Interop.Outlook.NameSpace outlookNamespace = null;
+            Microsoft.Office.Interop.Outlook.Accounts accounts = null;
+            Microsoft.Office.Interop.Outlook.Account account = null;
+            string accountList = string.Empty;
 
+            try
+            {
+               // ns = OutlookApp.Session;
+                outlookNamespace = outlookApplication.GetNamespace("MAPI");
+                accounts = outlookNamespace.Accounts;
+                for (int i = 1; i <= accounts.Count; i++)
+                {
+                    account = accounts[i];
+                    accountList += String.Format("{0} - {1}{2}",
+                        account.UserName,
+                        account.SmtpAddress,
+                        Environment.NewLine);
+                    //if (account != null)
+                    //    Marshal.ReleaseComObject(account);
+                }
+                MessageBox.Show(accountList);
+            }
+            finally
+            {
+                //if (accounts != null)
+                //    Marshal.ReleaseComObject(accounts);
+                //if (ns != null)
+                //    Marshal.ReleaseComObject(ns);
+            }
+        }
         private static void ReadMailItems()
         {
             Microsoft.Office.Interop.Outlook.Application outlookApplication = null;
@@ -73,7 +104,7 @@ namespace ReadEmail
         }
         private void SetCurrentFolder()
         {
-            string folderName = "TestFolder";
+            string folderName = "Fusion";
             thisInBox = (Microsoft.Office.Interop.Outlook.MAPIFolder)
                 this.outlookApplication.ActiveExplorer().Session.GetDefaultFolder
                 (Microsoft.Office.Interop.Outlook.OlDefaultFolders.olFolderInbox);
@@ -91,7 +122,7 @@ namespace ReadEmail
         }
         private void SearchInBox()
         {
-            string folderName = "TestFolder";
+            string folderName = "Fusion";
             //Microsoft.Office.Interop.Outlook.MAPIFolder inbox = this.outlookApplication.ActiveExplorer().Session.
             //    GetDefaultFolder(Microsoft.Office.Interop.Outlook.OlDefaultFolders.olFolderInbox);
             Microsoft.Office.Interop.Outlook.Items items = thisInBox.Items;
@@ -100,20 +131,26 @@ namespace ReadEmail
             outlookApplication.ActiveExplorer().CurrentFolder = thisInBox.
                     Folders[folderName];
 
-            string subjectName = string.Empty;
+            string subjectName = string.Empty, thisSubject = string.Empty;
             //string filter = "[Subject] > 's' And [Subject] <'u'";
             //filter = "[Subject] > 's'";
-           // folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items.Find(filter);
+            //folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items.Find(filter);
             int MailCount = outlookApplication.ActiveExplorer().CurrentFolder.Items.Count;
-            folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items.GetFirst();
-            while (folderItem != null)
+            folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items[1];
+          //  folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items.GetLast();
+            int mailRead = 1;
+            while (folderItem != null && mailRead < MailCount)
             {
+                mailRead++;
                 mailItem = folderItem as Microsoft.Office.Interop.Outlook.MailItem;
                 if (mailItem != null)
                 {
+                    thisSubject = mailItem.Subject;
                     subjectName += "\n" + mailItem.Subject;
                 }
-                folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items.GetNext();
+                //folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items.GetLast();
+                //folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items.GetNext();
+                folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items[mailRead];
             }
             subjectName = " The following e-mail messages were found: " +
                 subjectName;
@@ -127,7 +164,53 @@ namespace ReadEmail
                 obj = null;
             }
         }
+        private static void GetListOfStores()
+        {
+            Microsoft.Office.Interop.Outlook.Application outlookApplication = new Microsoft.Office.Interop.Outlook.Application();
+            
+            Microsoft.Office.Interop.Outlook.NameSpace outlookNamespace = null;
+            Microsoft.Office.Interop.Outlook.Stores stores = null;
+            Microsoft.Office.Interop.Outlook.Store store = null;
+            Microsoft.Office.Interop.Outlook.MAPIFolder rootFolder = null;
+            Microsoft.Office.Interop.Outlook.Folders folders = null;
+            Microsoft.Office.Interop.Outlook.MAPIFolder folder = null;
+            string folderList = string.Empty;
 
+            try
+            {
+                outlookNamespace = outlookApplication.GetNamespace("MAPI");
+                stores = outlookNamespace.Stores;
+                store = stores[2];
+                int storeCount = stores.Count;
+                rootFolder = store.GetRootFolder();
+                
+                folders = rootFolder.Folders;
+
+                for (int i = 1; i < folders.Count; i++)
+                {
+                    folder = folders[i];
+                    folderList += folder.Name + Environment.NewLine;
+                    //if (folder != null)
+                    //    ReleaseComObject(folder);
+                }
+                MessageBox.Show(folderList);
+            }
+            finally
+            {
+                //if (folders != null)
+                //    ReleaseComObject(folders);
+                //if (folders != null)
+                //    ReleaseComObject(folders);
+                //if (rootFolder != null)
+                //    ReleaseComObject(rootFolder);
+                //if (store != null)
+                //    ReleaseComObject(store);
+                //if (stores != null)
+                //    ReleaseComObject(stores);
+                //if (outlookNamespace != null)
+                //    ReleaseComObject(outlookNamespace);
+            }
+        }
         private void button1_Click(object sender, EventArgs e)
         {
             ReadMailItems();
@@ -141,6 +224,16 @@ namespace ReadEmail
         private void button3_Click(object sender, EventArgs e)
         {
             SearchInBox();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            ReadAccounts();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            GetListOfStores();
         }
     }
 
