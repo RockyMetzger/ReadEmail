@@ -18,6 +18,7 @@ namespace ReadEmail
         Microsoft.Office.Interop.Outlook.NameSpace outlookNamespace;
         MAPIFolder inboxFolder;
         Items mailItems;
+        string[] bodyLines = new string[100];
         static Microsoft.Office.Interop.Outlook.MAPIFolder thisInBox;
         public Form1()
         {
@@ -131,13 +132,11 @@ namespace ReadEmail
             outlookApplication.ActiveExplorer().CurrentFolder = thisInBox.
                     Folders[folderName];
 
-            string subjectName = string.Empty, thisSubject = string.Empty;
-            //string filter = "[Subject] > 's' And [Subject] <'u'";
-            //filter = "[Subject] > 's'";
-            //folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items.Find(filter);
+            string subjectName = string.Empty, thisSubject = string.Empty, thisBody = string.Empty;
+            
             int MailCount = outlookApplication.ActiveExplorer().CurrentFolder.Items.Count;
             folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items[1];
-          //  folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items.GetLast();
+          
             int mailRead = 1;
             while (folderItem != null && mailRead < MailCount)
             {
@@ -146,7 +145,13 @@ namespace ReadEmail
                 if (mailItem != null)
                 {
                     thisSubject = mailItem.Subject;
-                    subjectName += "\n" + mailItem.Subject;
+                    if (thisSubject.Contains("Daily Report:"))
+                    {
+                        thisBody = mailItem.Body;
+                        ParseBody(thisBody);
+                        subjectName += "\n" + mailItem.Subject;
+                    }
+                   
                 }
                 //folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items.GetLast();
                 //folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items.GetNext();
@@ -155,6 +160,18 @@ namespace ReadEmail
             subjectName = " The following e-mail messages were found: " +
                 subjectName;
             MessageBox.Show(subjectName);
+        }
+        void ParseBody(string thisBody)
+        {
+            int start = 0, end = 0;
+            for(int i = 0; i < 100; i++)
+            {
+                end = thisBody.IndexOf("\n", start);
+                bodyLines[i] = thisBody.Substring(start, end - start);
+                start = end + 1;
+
+
+            }
         }
         private static void ReleaseComObject(object obj)
         {
@@ -180,7 +197,7 @@ namespace ReadEmail
             {
                 outlookNamespace = outlookApplication.GetNamespace("MAPI");
                 stores = outlookNamespace.Stores;
-                store = stores[2];
+                store = stores[4];
                 int storeCount = stores.Count;
                 rootFolder = store.GetRootFolder();
                 
