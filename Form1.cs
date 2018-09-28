@@ -105,7 +105,7 @@ namespace ReadEmail
         }
         private void SetCurrentFolder()
         {
-            string folderName = "Fusion";
+            string folderName = "Inbox";
             thisInBox = (Microsoft.Office.Interop.Outlook.MAPIFolder)
                 this.outlookApplication.ActiveExplorer().Session.GetDefaultFolder
                 (Microsoft.Office.Interop.Outlook.OlDefaultFolders.olFolderInbox);
@@ -123,7 +123,7 @@ namespace ReadEmail
         }
         private void SearchInBox()
         {
-            string folderName = "Fusion";
+            string folderName = "Inbox";
             //Microsoft.Office.Interop.Outlook.MAPIFolder inbox = this.outlookApplication.ActiveExplorer().Session.
             //    GetDefaultFolder(Microsoft.Office.Interop.Outlook.OlDefaultFolders.olFolderInbox);
             Microsoft.Office.Interop.Outlook.Items items = thisInBox.Items;
@@ -191,26 +191,39 @@ namespace ReadEmail
             Microsoft.Office.Interop.Outlook.MAPIFolder rootFolder = null;
             Microsoft.Office.Interop.Outlook.Folders folders = null;
             Microsoft.Office.Interop.Outlook.MAPIFolder folder = null;
+            Microsoft.Office.Interop.Outlook.Accounts accounts = null;
+            Microsoft.Office.Interop.Outlook.Account account = null;
             string folderList = string.Empty;
+            int storeCount;
 
             try
             {
                 outlookNamespace = outlookApplication.GetNamespace("MAPI");
+                accounts = outlookNamespace.Accounts;
+               // account = accounts[1];
                 stores = outlookNamespace.Stores;
-                store = stores[4];
-                int storeCount = stores.Count;
-                rootFolder = store.GetRootFolder();
-                
-                folders = rootFolder.Folders;
-
-                for (int i = 1; i < folders.Count; i++)
+                for (int j = 1; j < 5; j++)
                 {
-                    folder = folders[i];
-                    folderList += folder.Name + Environment.NewLine;
-                    //if (folder != null)
-                    //    ReleaseComObject(folder);
+                    account = accounts[j];
+                    store = stores[j];
+                    storeCount = stores.Count;
+                    
+                    rootFolder = store.GetRootFolder();
+                    folders = rootFolder.Folders;
+                    //folderList += String.Format("{0} - {1}{2}",
+                    //    account.UserName,
+                    //    account.SmtpAddress,
+                    //    Environment.NewLine);
+                    for (int i = 1; i < folders.Count; i++)
+                    {
+                        folder = folders[i];
+                        folderList += folder.Name + Environment.NewLine;
+                        //if (folder != null)
+                        //    ReleaseComObject(folder);
+                    }
+                    MessageBox.Show(folderList);
+                    folderList = string.Empty;
                 }
-                MessageBox.Show(folderList);
             }
             finally
             {
