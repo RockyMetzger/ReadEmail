@@ -105,14 +105,21 @@ namespace ReadEmail
         }
         private void SetCurrentFolder()
         {
+            Microsoft.Office.Interop.Outlook.Folders folders = null;
+            Microsoft.Office.Interop.Outlook.MAPIFolder folder = null;
             string folderName = "Inbox";
             thisInBox = (Microsoft.Office.Interop.Outlook.MAPIFolder)
                 this.outlookApplication.ActiveExplorer().Session.GetDefaultFolder
                 (Microsoft.Office.Interop.Outlook.OlDefaultFolders.olFolderInbox);
-            try
+           // folders = rootFolder.Folders;
+            folders = thisInBox.Folders;
+
+           
+                folder = folders[1];
+            folderName = folder.Name;
+                try
             {
-                this.outlookApplication.ActiveExplorer().CurrentFolder = thisInBox.
-                    Folders[folderName];
+                this.outlookApplication.ActiveExplorer().CurrentFolder = thisInBox.Folders[folderName];
                 this.outlookApplication.ActiveExplorer().CurrentFolder.Display();
             }
             catch
@@ -123,12 +130,18 @@ namespace ReadEmail
         }
         private void SearchInBox()
         {
+            Microsoft.Office.Interop.Outlook.Folders folders = null;
+            Microsoft.Office.Interop.Outlook.MAPIFolder folder = null;
             string folderName = "Inbox";
             //Microsoft.Office.Interop.Outlook.MAPIFolder inbox = this.outlookApplication.ActiveExplorer().Session.
             //    GetDefaultFolder(Microsoft.Office.Interop.Outlook.OlDefaultFolders.olFolderInbox);
             Microsoft.Office.Interop.Outlook.Items items = thisInBox.Items;
             Microsoft.Office.Interop.Outlook.MailItem mailItem = null;
             object folderItem;
+            folders = thisInBox.Folders;
+
+            folder = folders[1];
+            folderName = folder.Name;
             outlookApplication.ActiveExplorer().CurrentFolder = thisInBox.
                     Folders[folderName];
 
@@ -137,7 +150,7 @@ namespace ReadEmail
             int MailCount = outlookApplication.ActiveExplorer().CurrentFolder.Items.Count;
             folderItem = outlookApplication.ActiveExplorer().CurrentFolder.Items[1];
           
-            int mailRead = 1;
+            int mailRead = 0;
             while (folderItem != null && mailRead < MailCount)
             {
                 mailRead++;
@@ -167,10 +180,9 @@ namespace ReadEmail
             for(int i = 0; i < 100; i++)
             {
                 end = thisBody.IndexOf("\n", start);
-                bodyLines[i] = thisBody.Substring(start, end - start);
+                //end = 20;
+                if(end > start) bodyLines[i] = thisBody.Substring(start, end - start);
                 start = end + 1;
-
-
             }
         }
         private static void ReleaseComObject(object obj)
